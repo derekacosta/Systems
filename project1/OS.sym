@@ -1,0 +1,28 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	DSR_PTR           5011
+//	_INIT_PUTC        5004
+//	_PUTC             500A
+//	DDR_PTR           5010
+//	PUTC_PTR          5009
+//	POLL              500B
+//	PUTC_TVT          5008
+//	USER_START        5003
+//	SAVED_R1          5012
+//	_MAIN             5000
+//	$               5000
+//	$               5001
+//	$               5002
+//	$               5004
+//	$               5005
+//	$               5006
+//	$               5007
+//	$               500A
+//	$               500B
+//	$               500C
+//	$               500D
+//	$               500E
+//	$               500F
+

@@ -1,0 +1,9 @@
+reset
+as P2OS.asm
+as P2user.asm
+as P2boot.asm
+load P2OS.obj
+load P2user.obj
+load P2boot.obj
+set PC x0200
+continue

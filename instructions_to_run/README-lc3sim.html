@@ -1,0 +1,84 @@
+<html>
+<body>
+<h3>
+  	 lc3sim, User Manual
+</h3>
+Ref: lc3tools_v12.zip, Steven Lumetta's unix/linux version.
+
+<p>
+This refers to the command-line tools found in lc3tools/ which include the lc3sim 
+simulator and the lc3as assembler. lc3as accepts ascii text files 
+containing LC3 assembly code, eg. foo.asm, and produces LC3 object files, eg. 
+foo.obj.:
+<br><br>
+
+    lc3as foo.asm
+
+<br><br>
+The simulator loads the .obj files to its simulated memory and simulates
+LC3 execution.
+
+<br><br>
+NOTE--lc3sim starts up by reading the lc3os.obj operating system code into its 
+simulated LC3's memory. 
+The LC3 design specifies that execution starts at x0200 on power on. 
+The initial OS code would print a message and jump to 
+x3000 to begin execution of a user program (if one is there; otherwise, begins 
+executing whatever garbage is there.) 
+However, the simulator acts as if it has a 
+breakpoint set at address x0454. It halts execution and issues the simulator's 
+command prompt. This command-line version of the simulator does not seem to 
+simulate the display device (but see lcsim-tk). 
+</p>
+
+<pre>
+Commands for lc3sim:
+
+Command             Description
+-------------       ----------------------------
+lc3sim                   ---- start simulator
+lc3sim file.obj          ---- Load program and start simulator. 
+lc3sim-tk                ---- start graphical simulator.
+lc3sim-tk file.obj       ---- Load program and start graphical simulator.
+h                   show all commands
+quit                quit simulator
+
+l                   LIST words of memory w/ disassembly
+l                   -- from PC
+l loc               -- from loc = address or loc = label
+l loc1 loc2         -- ranging from loc1 to loc2
+l more              -- from last location displayed (or just hit [RETURN])
+
+t label             TRANSLATE a label to its symbol table value,
+                    and show memory contents at that address.
+
+p                   PRINT register values, and show memory word at PC
+
+r reg val           REGISTER assignment: reg <== val.
+
+m addr val          MEMORY assignment: Mem[ addr ] <== val.
+
+c                   CONTINUE execution: start machine cycle running
+
+b                   BREAKPOINT: manage execution stops
+b set loc           -- set breakpoint when PC ==  loc (address or label)
+b list              -- list all breakpoints
+b clear loc         -- remove breakpoint at loc
+b clear all         -- remove all breakpoints
+ 
+n                   NEXT execute instruction or subroutine or trap at PC.
+s                   SINGLE-STEP execute single instruction at PC.
+f                   FINISH execution of subroutine or trap, including RET.
+
+d                   DUMP memory as hex words
+d                   -- from near PC
+d loc               -- from loc
+d loc1 loc2         -- from range
+d more              -- from last displayed location (or use [RETURN] )
+
+f filename          FILE read into memory at loc specified by ".ORIG".
+reset               RESET LC3 and reload the last file. 
+execute filename    EXECUTE script file. 
+</pre>
+</body>
+</html>

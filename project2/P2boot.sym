@@ -1,0 +1,11 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	OS_MAIN           0204
+//	OS_STACK          0203
+//	_BOOT             0200
+//	$               0200
+//	$               0201
+//	$               0202
+

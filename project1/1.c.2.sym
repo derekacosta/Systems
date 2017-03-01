@@ -1,0 +1,40 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	MEANMAGPTR        3001
+//	FILESTARTPTR      3000
+//	FILESTART         301C
+//	FILESIZE          301B
+//	FILESIZEPTR       3002
+//	COND              300E
+//	RETURNPTR         3004
+//	START             3010
+//	MEANMAG           3026
+//	JUMP              301A
+//	END               3017
+//	ACC               3014
+//	NEG2POSPTR        3003
+//	$               3005
+//	$               3006
+//	$               3007
+//	$               3008
+//	$               3009
+//	$               300A
+//	$               300B
+//	$               300C
+//	$               300D
+//	$               300E
+//	$               300F
+//	$               3010
+//	$               3011
+//	$               3012
+//	$               3013
+//	$               3014
+//	$               3015
+//	$               3016
+//	$               3017
+//	$               3018
+//	$               3019
+//	$               301A
+

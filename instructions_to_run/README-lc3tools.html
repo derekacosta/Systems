@@ -1,0 +1,153 @@
+<html>
+<pre>
+
+===========================
+===========================
+LC3 Tools Reference
+===========================
+===========================
+
+Assemblers, simulators, C compiler, IDEs, course sites, 
+reference material.  Also see user guides in docs/.
+
+===========================
+LC3 Simulators, Assemblers and C Compiler.
+===========================
+
+P&P textbook's web site, student materials:
+
+    http://www.mhhe.com/patt2
+
+You will need the unix version of the assembler and C compiler
+by Steven Lumetta.  Or see ../src/lc3tools_v12.zip.  It Contains 
+sources and makefiles to build,
+
+    a. lc3as: a commandline LC3 assembler produces
+      1. foo.obj, an LC3 machine code object file.
+      2. foo.sym, the symbol table
+
+    b. lc3sim: commandline LC3 simulator, 
+       reads .obj files, simulates LC3 execution.
+       I recommend PennSim.jar instead.
+
+    c. lc3convert: a commandline translator.
+       Takes .bin input and produces .obj output. The .bin input can be 
+       binary-coded text (-b2) or hex-coded text (-b16).
+
+See usage documentation for these below.
+Also includes lc3os.asm: an lc3 operating system (or see ../src/).
+
+
+=========================
+Other course sites, documentation 
+=========================
+
+CIS, U Penn, Diana Palsetia et alia.
+Contains an lc3 assembler/simulator written in Java, PennSim.jar.
+Uses a version of the lc3 which includes a MCR (machine control reg), 
+MPR (memory protection reg), TMR/TMI (timer), and memory-mapped video 
+RAM. The simulator's version of the lc3 ISA also includes an instruction 
+that sets user/supervisor mode, jumpt.  Site also has source code for an OS 
+for the lc3. The OS code can be easily edited to convert it to standard lc3 ISA.
+
+   http://www.cis.upenn.edu/~palsetia/lc3guide.html
+
+   http://www.cis.upenn.edu/~palsetia/lc3manual.html
+
+Also available at David Wood's site:
+
+    http://pages.cs.wisc.edu/~david/courses/cs252/Spring2009/includes/computing1.html
+
+Ashley Wise's LC-3 and LC-3b Tools (Simulator, Assembler, IDE).
+Pre-compiled IDE for Windows/Linux/Solaris.
+
+   http://www.crhc.uiuc.edu/~awise
+
+
+========================
+Misc. info:
+========================
+
+End-of-lines, unix/dos/apple
+
+    MS Windows, DOS: x0D x0A 
+    (aka: CR LF,  \r \f, ^13 ^10, ^M ^J, 0x0D 0x0A)
+
+   Apple Macintosh OS 9 and earlier: x0D (CR)
+
+   Unix (e.g., Linux), also Apple OS X and higher: x0A (LF)
+
+
+====================================
+LC3 tools, unix version (Lumetta)
+====================================
+Build using gcc (see README in lc3tools-v12.zip distribution).
+
+Contents:
+--- lc3as:        LC3 assembler, produces .obj files.
+--- lc3convert:   ascii to .obj converter.
+
+
+-------------------------
+-------------------------
+lc3as, usage
+-------------------------
+-------------------------
+
+Assembles LC3 assembly source code to an .obj file.
+
+Command            ---- Description 
+-------------      ---------------------------
+lc3as file.asm     ---- Creates file.obj and file.sym, the symbol table. 
+
+Error Message                      ---- Explanation
+------------------------           ---------------------------
+file contains only comments        ---- no assembly instructions in file.
+no .ORIG or .END directive found   ---- .ORIG/.END must be first/last line.
+multiple .ORIG directives found    ---- one .ORIG is allowed per file. 
+instruction appears before .ORIG   ---- instructions must start after .ORIG.
+no .END directive found            ---- all programs must end with .END. 
+label appears before .ORIG         ---- nothing should appear before .ORIG.
+label has already appeared         ---- label can only be defined once.
+unknown label x                    ---- label x is referenced, but not defined. 
+illegal operands for x             ---- instruction has bad operand specification. 
+unterminated string                ---- .STRINGZ has no close-quotes.
+contains unrecognizable characters ---- found chars that assembler cannot parse. 
+WARNING: All text after .END is ignored.
+
+
+---------------------------
+---------------------------
+lc3convert, usage
+---------------------------
+---------------------------
+
+Convert ascii text version of a machine code .obj file to 
+an actual executable machine code .obj file that can be 
+run in the simulator.  As with the actual lc3 .obj format,
+the first line must contain the load address of 
+the first instruction: if the first line is
+
+    0011 0000 0000 0000
+
+then the first instruction will be located at x3000 when running 
+the simulator. Since lc3convert is reading plain text files, it
+can handle some extras: (1) the ";" comment character
+causes the rest of the line to be ignored, (2) digits may have white
+space within them to help visually group them.
+
+Command                     ---- Description 
+-----------------           ---------------------------
+lc3convert file.bin         ---- create file.obj, which can be run by simulator.
+lc3convert -b2 file.bin     ---- machine code is text in binary (base 2). 
+lc3convert -b16 file.bin    ---- machine code is text in hex (base 16). 
+
+Error Message                      ---- Explanation
+----------------------             ---------------------------
+line contains only x digits        ---- only x digits of 16-bit instruction found.
+line contains more than 16 digits  ---- instruction bigger than 16-bits.
+contains unrecognizable characters ---- invalid characters were used.
+constant outside of allowed range  ---- Immediate value exceeds instruction's range.
+
+</pre>
+</html>

@@ -1,0 +1,317 @@
+;;---------------------------
+;;--  skel.src
+;;--
+;;-- Use this skeleton code to make writing your
+;;-- own LC3 .asm easier. It includes m4 macro definitions
+;;-- that will make your code clearer and help you
+;;-- avoid errors. These often bundle several LC3 instructions
+;;-- together for common tasks, such as push and pop.
+;;-- 
+;;-- Usage:
+;;-- 
+;;--    cat foo.src | m4 > foo.asm
+;;-- 
+;;----------------------------
+ 
+;;------- m4 macro definitions for readability:
+
+divert(-1)dnl ------- suppress output temporarily for definitions.
+
+define(`GDP',`R4')dnl   "GDP" ===> "R4"
+
+define(`sp',`R6')dnl    "sp" ===> "R6"
+
+define(`bp',`R5')dnl    "bp" ===> "R5"
+
+divert(0)dnl
+
+.ORIG x0200
+
+;;========== TEXT =========================================
+
+Entry:
+    BRnzp Preamble        ;;-- goto Preamble
+
+GDT_address:              ;;-- 
+    .FILL GDT_            ;;-- const GDT_address ==  GDT_
+
+Preamble:                 ;;====== Preamble =============
+    LD  GDP, GDT_         ;;-- ( R4 == GDP ) <=== GDT_
+    LDR sp, GDP, #0       ;;-- ( R6 == sp  ) <=== ( GDT[0] == STACKBOT )
+    ADD sp, sp, #-1       ;;-- sp--    ( make space for local i )
+    STR sp, sp, #0        ;;-- sp ===> Mem[ sp ]                  
+    LDR R5, sp, #0        ;;-- ( R5 == bp ) <=== Mem[ sp ] ( bp = sp )
+                          ;;--
+
+Main:                     ;;====== Main =================
+                          ;;--
+                          ;;-- initialize counter i = -CHAR_ROWS:
+    LDR R0, R4, #20       ;;--   R0 <=== ( CHAR_ROWS == GDT[20]   )
+    NOT R0, R0            ;;--   NOT( R0 )        ( negate R0 )
+    ADD R0, R0, #1        ;;--   R0 = R0 +1       ( negate R0 )
+    STR R0, R5, #0        ;;--   R0 ===> Mem[bp]  ( i = -CHAR_ROWS )
+                          ;;--
+                          ;;-- initialize arguments vram and charPix:
+    LDR R0, R4, #6        ;;--   R0 <=== ( VRAM_   == GDT[6]  )
+    STR R0, R4, #8        ;;--   R0 ===> ( vram    == GDT[8]  )
+    LDR R0, R4, #9        ;;--   R0 <=== ( CHAR_A_ == GDT[9]  )
+    STR R0, R4, #11       ;;--   R0 ===> ( charPix == GDT[11] )
+                          ;;--
+    LOOP0:                ;;-- Loop
+                          ;;--
+                          ;;--   call writeRow( vram, charPix ):
+    LEA R7, next0         ;;--     R7 <=== return address
+    LDR R0, R4, #22       ;;--     R0 <=== ( writeRow_ == GDT[22] )
+    JMP R0                ;;--     PC <=== R0
+    next0:                ;;--
+                          ;;--   advance vram to next row:
+    LDR R0, R4, #8        ;;--     R0 <=== ( vram    == GDT[8]  )
+    LDR R1, R4, #7        ;;--     R1 <=== ( COLS    == GDT[7]  )
+    ADD R0, R0, R1        ;;--     R0 <=== ( vram + COLS        )
+    STR R0, R4, #8        ;;--     R0 ===> ( vram    == GDT[8]  )
+                          ;;--
+                          ;;--   advance charPix to next row:
+    LDR R0, R4, #11       ;;--     R0 <=== ( charPix   == GDT[11] )
+    LDR R1, R4, #21       ;;--     R1 <=== ( CHAR_COLS == GDT[21]  )
+    ADD R0, R0, R1        ;;--     R0 <=== ( charPix + CHAR_COLS  )
+    STR R0, R4, #11       ;;--     R0 ===> ( charPix   == GDT[11] )
+                          ;;--
+                          ;;--   increment i:
+    LDR R3, R5, #0        ;;--     R3 <=== i
+    ADD R3, R3, #1        ;;--     R3++
+    STR R3, R5, #0        ;;--     R3 ===> i
+                          ;;--
+    BRn LOOP0             ;;-- Until (i == 0)
+                          ;;--
+exit:                     ;;-- We don't know what to do here.
+    BR exit               ;;-- Let's just hang in a loop.
+
+                          ;;====== Sub-Routines =================
+
+                          ;;--------------------------------------
+writeRow_:                ;;------ writeRow( )
+                          ;;------
+                          ;;------   Uses globals as arguments:
+                          ;;------     ( pixel *vram, pixel *charPix )
+                          ;;------   Writes a row of pixels from font
+                          ;;------   font buffer to VRAM.
+                          ;;------   Clobbers R0-R3. Returns via R7.
+                          ;;------
+    LDR R0, R4, #8        ;;-- R0 <=== vram
+    LDR R1, R4, #11       ;;-- R1 <=== charPix
+                          ;;-- loop counter <=== -CHAR_COLS:
+    LDR R3, R4, #21       ;;--   R3 <=== (CHAR_COLS == GDT[21])
+    NOT R3, R3            ;;--   R3 <=== NOT( R3 ) : ( negate R3 )
+    ADD R3, R3, #1        ;;--   R3 <=== R3 + 1    : ( negate R3 )
+                          ;;-- 
+    LOOP1:                ;;-- LOOP
+    LDR R2, R1, #0        ;;--     R2 <=== *charPix
+    STR R2, R0, #0        ;;--     R2 ===> *vram
+    ADD R1, R1, #1        ;;--     charPix++
+    ADD R0, R0, #1        ;;--     vram++
+    ADD R3, R3, #1        ;;--     R3++
+    BRn LOOP1             ;;-- Until (R3 == 0)
+                          ;;-- 
+    JMP R7                ;;-- return()  ( PC <=== R7 )
+
+
+;;========== DATA =========================================
+
+GDT_:
+
+;;-- identifier      value          offset   description
+;;-------------      ------         ------  ---------------
+    STACKBOT_:   .FILL x3000     ;;--- (  0)  Bottom of Stack
+    WHITE_:      .FILL x7FFF     ;;--- (  1)  White
+    BLACK_:      .FILL x0000     ;;--- (  2)  Black
+    RED_:        .FILL x7C00     ;;--- (  3)  Red
+    GREEN_:      .FILL x03E0     ;;--- (  4)  Green
+    BLUE_:       .FILL x001F     ;;--- (  5)  Blue
+    VRAM_START_: .FILL xC000     ;;--- (  6)  start of VRAM, VRAM_
+    COLS_:       .FILL x0080     ;;--- (  7)  cols per VRAM row
+    vram_:       .BLKW 1         ;;--- (  8)  pointer into VRAM
+    CHAR_A_:     .FILL Char_A_   ;;--- (  9)  address of 'A' buffer
+    CHAR_B_:     .FILL Char_B_   ;;--- ( 10)  address of 'B' buffer
+    charPix_:    .BLKW 1         ;;--- ( 11)  pointer into char pixel buffer
+    color_:      .BLKW 1         ;;--- ( 12)  pixel value
+    vram_row_:   .BLKW 1         ;;--- ( 13)  cursor row in VRAM
+    vram_col_:   .BLKW 1         ;;--- ( 14)  cursor column in VRAM
+    ZERO_:       .FILL x0000     ;;--- ( 15)  const 0
+    msg_:       
+    msg0_:       .FILL x0042     ;;--- ( 16)  msg[0] == 'B'
+    msg1_:       .FILL x0041     ;;--- ( 17)  msg[1] == 'A'
+    msg2_:       .FILL x0042     ;;--- ( 18)  msg[2] == 'B'
+    msg3_:       .FILL x0000     ;;--- ( 19)  msg[3] == '\NUL'
+    CHAR_ROWS_:  .FILL x0009     ;;--- ( 20)  num rows per char buffer
+    CHAR_COLS_:  .FILL x0007     ;;--- ( 21)  num cols per char buffer
+    writeRow_:   .FILL writeRow_ ;;--- ( 22)  writeRow function pointer
+
+
+
+Char_A_:         ;;--- start of 'A' buffer
+                 ;;-- Arow0:    . . . . . . .
+                 ;;-- Arow1:    . . # # # . .
+                 ;;-- Arow2:    . # . . . # .
+                 ;;-- Arow3:    . # . . . # .
+                 ;;-- Arow4:    . # # # # # .
+                 ;;-- Arow5:    . # . . . # .
+                 ;;-- Arow6:    . # . . . # .
+                 ;;-- Arow7:    . # . . . # .
+                 ;;-- Arow8:    . . . . . . .
+Arow0:
+        .FILL x7FFF         
+        .FILL x7FFF         
+        .FILL x7FFF         
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+Arow1:
+        .FILL x7FFF 
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7FFF
+        .FILL x7FFF 
+Arow2:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7c00 
+        .FILL x7FFF 
+Arow3:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7c00 
+        .FILL x7FFF 
+Arow4:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7FFF 
+Arow5:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7c00 
+        .FILL x7FFF 
+Arow6:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7c00 
+        .FILL x7FFF 
+Arow7:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7c00 
+        .FILL x7FFF 
+Arow8:
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF 
+
+Char_B_:         ;;--- start of 'B' buffer
+                 ;;-- Brow0:    . . . . . . .
+                 ;;-- Brow1:    . # # # # . .
+                 ;;-- Brow2:    . # . . . # .
+                 ;;-- Brow3:    . # . . . # .
+                 ;;-- Brow4:    . # # # #   .
+                 ;;-- Brow5:    . # . . . # .
+                 ;;-- Brow6:    . # . . . # .
+                 ;;-- Brow7:    . # # # # . .
+                 ;;-- Brow8:    . . . . . . .
+Brow0:
+        .FILL x7FFF         
+        .FILL x7FFF         
+        .FILL x7FFF         
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+Brow1:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7FFF
+        .FILL x7FFF 
+Brow2:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7c00 
+        .FILL x7FFF 
+Brow3:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7c00 
+        .FILL x7FFF 
+Brow4:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7FFF 
+Brow5:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7c00 
+        .FILL x7FFF 
+Brow6:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7c00 
+        .FILL x7FFF 
+Brow7:
+        .FILL x7FFF 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7c00 
+        .FILL x7FFF 
+Brow8:
+        .FILL x7FFF 
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF
+        .FILL x7FFF 
+
+.END

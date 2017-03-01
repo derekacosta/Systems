@@ -1,0 +1,1268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0058)http://www.seas.upenn.edu/~cit593/resources/lc3manual.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	
+	<title>PennSim LC-3 Simulator Manual</title>
+	<meta name="GENERATOR" content="OpenOffice.org 2.0  (Linux)">
+	<meta name="CREATED" content="20060908;12071900">
+	<meta name="CHANGED" content="20060908;14081500">
+</head>
+<body lang="en-US" dir="LTR">
+<h1>PennSim LC-3 Simulator User Guide and Manual</h1>
+<pre>
+Contents:
+---- Quick Guide
+---- User Guide
+---- Manual
+</pre>
+<h2>Quick Guide</h2>
+<p>
+<pre>
+
+=========================================================
+=============== Run PennSim =============================
+=========================================================
+
+--- double click PennSim.jar or "java -jar PennSim.jar"
+    NB--Run in source code (.asm) directory
+
+=========================================================
+=============== PennSim GUI Usage =======================
+=========================================================
+
+--- Load object file: File.Open foo.obj
+
+--- Execute program using buttons:
+                Step       (one instruction)
+                Continue   (until breakpoint, or Stop)
+                Next       (until next RET)
+                Stop       (suspend execution simulation)
+
+--- Set Break point: select check box of memory location
+
+--- Scroll through memory:
+                select memory cell, use up/down arrows
+                use scroll bar (very fast, hard to control)
+                use scroll bar arrow (very, very slow)
+
+--- Change register/memory value: select value and edit
+
+--- LC3 Display output windows:
+                Devices, top window: graphics-mode memory-mapped VRAM
+                Devices, bottom window: DDR text-mode output
+
+=========================================================
+=========== PennSim Commandline Usage ===================
+==== (see the commandline input window below buttons) ===
+=========================================================
+
+--- Assemble: "as foo.asm"
+
+--- Load: "ld foo.obj"
+
+--- Keyboard input: "input keystrokes.txt"
+
+--- Execute commands from file: "script foo.txt"
+
+--- Reset simulator to initial state: "reset"
+
+--- See I/O device register content: "list x0FE02"
+
+--- Other commands:
+        h                                 (help)
+        b x0200                           (set breakpoint)
+        d [-option]  x0200 x020F  foo.txt (dump memory to file)
+           -readmemh                      (dump in hex verilog-input format)
+        n, s, c, stop                     (execute: n_ext, s_tep, c_ontinue, stop)
+        set x02FF x1234                   (write to mem[x02FF] <== x1234)
+        set Label x1234                   (write memory at label)
+        set N                             (set CC = N)
+        set R1 x1234                      (set reg value)
+        p                                 (show all reg values)
+        l                                 (show memory at PC)
+        l  addr1 addr2                    (show range)
+        l  addr1                          (show starting at addr1)
+        l  label                          (show starting at label)
+        quit                              (exit PennSim)
+</pre>
+</p>
+<h2>User Guide</h2>
+<h3><a name="guide"></a>0. Conventions</h3>
+<p style="border: none; padding: 0in">Throughout this document,
+commands that you have to type or buttons you have to click will
+appear <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">like
+so</font></font></span>. 
+</p>
+<h3>1. Getting Java</h3>
+<p>The LC-3 Simulator is written in Java, which means Java must be
+installed on the computer you plan to use. Java should already be
+available on all public SEAS machines. If you plan to work on your
+personal machine, you may need to install Java yourself. You can
+<a href="http://java.com/en/download/index.jsp">download Java here</a>.
+The LC-3 simulator requires Java 1.4 or newer (which is available for
+Windows, Linux, and Mac OS X).</p>
+<p>&nbsp;</p>
+<h3>2. Getting the Simulator</h3>
+<p style="border: none; padding: 0in">Next, you need to download the
+simulator. It is distributed in a .jar file (short for Java ARchive)
+which you can <a href="http://www.seas.upenn.edu/~cit593/resources/LC3code/PennSim.jar">download here</a>. In
+Windows or on a Mac, you should be able to double-click the .jar file
+to launch the simulator. You can also launch the simulator from the
+command line (shell in Linux or command prompt in Windows) of your operating system (Linux/Unix) by using the
+command:</p>
+<blockquote>
+  <blockquote>
+    <p style="border: none; padding: 0in"> <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000"> java
+      -jar (jarfile)</font></font></span></p>
+  </blockquote>
+</blockquote>
+<p>If the above command jar command did not work, it is probably that <strong>java bin directory </strong> is not set in your kernel's (OS) search path. </p>
+<p><strong>Linux</strong><br>
+For Linux machines make sure you shell is <strong>tcsh</strong>. Type: 
+</p><pre>/usr/java/jdk1.5.0/bin/java -jar PennSim.jar</pre>
+<p>The CETS computer labs should automatic have set the java environment variable but if the jar command does not work then, set the Java path  in your <strong>.cshrc or .bashrc </strong>file to include the following in the set path section: <strong>set path = ($path /usr/java/jdk1.5.0/bin . ) </strong>.Make sure that there is a period before closing the brackets. Execute your .cshrc/.bashrc file using the <strong>source</strong> command. The source command will enable the the changes into your environment. E.g.
+</p><p><code>source .cshrc</code> 
+</p><p><strong>Windows</strong><br>For Windows machines follow the <a href="http://www.seas.upenn.edu/~cit593/resources/windowspath.htm" target="_blank">link</a> for setting up the search path. To launch the simulator, use the <b>Command Prompt
+  </b>via Start &gt; Programs &gt; Accessories. At the prompt, change directory (cd) to
+  location where LC3 jar file is saved. You can find the windows commands <a href="http://www.computerhope.com/overview.htm" target="_blank">here</a>.&nbsp; 
+</p><p>J<strong>ava IDE</strong><br>
+Use any Java IDE you are familiar with and open the jar file.
+
+</p>
+<p>If you have any problems starting the simulator, please email TA or Instructor. This will ensure the
+  fastest response.</p>
+<p>&nbsp;</p>
+<h3>3. Assembling and Loading Software</h3>
+<p>Now the simulator is running, but to get it to do anything
+interesting, we need to load some software. The first piece of
+software we should load is, naturally, an operating system. The LC-3
+operating system is very basic: it handles simple I/O operations and
+is responsible for starting other programs, such as the ones you will
+write for homework assignments. <a href="http://www.seas.upenn.edu/~cit593/resources/LC3code/lc3os.asm">Download the LC-3
+OS here</a> (right click to save).</p>
+<p style="border: none; padding: 0in">So that you can understand what
+the operating system does, we distribute it as an assembly language
+file. But the LC-3 machine doesn't understand assembly directly; we
+first have to 'assemble' the assembly code into machine language (a
+.obj file containing binary data). The LC-3 simulator has a built-in
+assembler, accessible (as is the case for most of its functionality)
+via the Command Line text box (see screenshot above). To assemble the
+operating system, type <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">as
+lc3os.asm</font></font></span> at the command line and hit enter.
+Make sure that the OS file is in the same directory as the .jar file;
+the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">as</font></font></span>
+command also understands relative and absolute paths if the OS is in
+a different directory. Output from the assembly process is displayed
+in the CommandLine Output Pane. After assembling the OS, you should
+notice that 2 new files, lc3os.obj and lc3os.sym, have been created.
+The .obj file is the machine language encoding of the assembly
+language file, and the .sym file is a text file that holds symbol
+information so the simulator can display your symbols. Recall that
+symbols are really just a convenience for humans; the machine
+language encoding knows only about offsets. 
+</p>
+<p style="border: none; padding: 0in">Now we can load the lc3os.obj
+file into the simulator, either via the command <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">load
+lc3os.obj</font></font></span> or by going to the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">File</font></font></span>
+menu and selecting <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">Open
+.obj file</font></font></span>. Notice that the contents of the
+memory change when the OS is loaded. 
+</p>
+<p style="border: none; padding: 0in">Now assemble and load <a href="http://www.seas.upenn.edu/~cit593/resources/LC3code/p0.asm">the
+solution file for Problem 0</a> into the simulator. The memory has
+changed again, but you may not notice since the relevant memory
+addresses (starting at x3000) aren't visible unless you've scrolled
+the screen. User-level programs (i.e., non-OS code) start, by
+convention, at x3000. If you type the command <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">list
+x3000</font></font></span> the memory view will jump to x3000 and you
+can see the 1-instruction solution to this problem.</p>
+<h3>4. Running Code</h3>
+<p style="border: none; padding: 0in">To actually run code, you can
+use the 4 control buttons at the top of the simulator, or type
+commands into the command line interface (the command names are the
+same as the buttons). Note that the PC register is set to x0200,
+which is the entry point to the operating system by convention.
+Recall that <a href="http://www.seas.upenn.edu/~cit593/resources/LC3code/p0.asm">the solution code for Problem 0</a>
+increments the value in R2 and puts the result in R5. Set the value
+in R2 to something you fancy, either by double-clicking it in the
+Registers section, or via the command <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">set
+R2 (value)</font></font></span>. Now, actually run the code by
+hitting the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">continue</font></font></span>
+button. The value magically gets incremented and moved to R5. Also observe that the PC now points to x0263, an apparently random
+value somewhere in the operating system, and that the Status Display
+tells us the machine is halted.</p>
+<h3>4a. Running Code...slowly</h3>
+<p style="border: none; padding: 0in">Clearly, some things are going
+on here. But to determine what they are exactly, we need to slow the
+execution down. You can hit the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">stop</font></font></span>
+button to pause the machine while it's executing, but this doesn't
+give you very fine-grained control. The <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">continue</font></font></span>
+command will start running instructions as fast as possible, but
+often we want to go just one instruction at a time. This is what the
+<span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">next</font></font></span>
+and <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">step</font></font></span>
+commands allow us to do. They both go one instruction at a time, but
+the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">step</font></font></span>
+command will "follow" function calls and traps, while <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">next</font></font></span>
+just goes from line to line, "over" function calls and
+traps and stopping only at the instruction immediately after them.
+Both <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">next</font></font></span>
+and <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">step</font></font></span>
+will "follow" branches. The <a href="http://www.seas.upenn.edu/~cit593/resources/lc3manual.html">LC-3
+Manual</a> has a more involved discussion, with an example, of the
+difference between <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">next</font></font></span>
+and <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">step</font></font></span>.
+</p>
+<p style="border: none; padding: 0in">Let's try running the program
+again, but just one instruction at a time. Notice that from the
+halted state, the PC points to an instruction that will branch us
+right back to the start of the operating system. So we can hit <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">next</font></font></span>
+once and start the cycle over again. Note that registers are as we
+left them. You can put a new value into R2 if you want, and the old
+value in R5 will get overwritten. Sometimes, having old values lying
+around everywhere can be problematic, and it's good to do a real
+"reboot" via the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">reset</font></font></span>
+command. This clears <i>all</i> of memory and resets registers to
+default values, so you have to reload the OS and your program. 
+</p>
+<p style="border: none; padding: 0in">You can keep <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">next</font></font></span>-ing
+over the OS code; eventually you will hit the RTT instruction at
+location x0205 that jumps to the start of our program at x3000. Now
+you can see the 2 instructions that constitute our program. You can
+see the ADD being performed, and then the machine gets halted again. 
+</p>
+<p>Continue running the increment-R2-into-R5 code until, if ever, you
+get bored. Then move on to the next section. 
+</p>
+<h3>4b. Running Code...for a little while</h3>
+<p><a name="guide2"></a>Going one instruction at a time is great, but
+somewhat tedious. We need a happy medium between not knowing what's
+going on at all, and having to go through every single instruction,
+whether we care about it or not. Breakpoints are this happy medium. 
+</p>
+<p style="border: none; padding: 0in">A breakpoint is set at a
+particular memory location, and tells the simulator to stop execution
+upon reaching that point. Memory locations with breakpoints set on
+them show up in the simulator with a red square in the "BP"
+column. It is left as an exercise to the reader to determine what
+"BP" stands for. You can set a breakpoint at a memory
+location with the command <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">break
+set (memory location)</font></font></span>, or by checking the
+checkbox in the "BP" column. You can get rid of a
+previously-set breakpoint with the command <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">break
+clear (memory location)</font></font></span>, or by un-checking a
+previously checked box. You can also set and clear breakpoints at
+labels, instead of specifying a hex memory location. 
+</p>
+<p style="border: none; padding: 0in">When you tell the simulator to
+<span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">continue</font></font></span>,
+it will only run until it hits a breakpoint (or the system halts or
+has an error). When you are writing and testing your answer for
+Problem 0, you can use the command <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">break
+set START</font></font></span> to set a breakpoint at the beginning
+of your code. Then, you can use <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">continue</font></font></span>
+to skip all the OS code and get to the instructions you care about.
+Then you can <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">next</font></font></span>
+over your code to make sure it's doing what you want it to do. 
+</p>
+<h3>5. Running Scripts</h3>
+<p style="border: none; padding: 0in">Now try running the
+test script provided for Problem 0. You can do this with
+the command <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">script
+(scriptfile)</font></font></span>. LC-3 script files are .lcs files,
+but are really just plain text, and the file extension doesn't really
+matter. If you open the script file with a text editor, you can see
+that the script commands are the same as those you type at the
+command line. For repetitive tasks, using a script file can save you
+time, and perhaps the lifelong agony of <a href="http://en.wikipedia.org/wiki/Repetitive_stress_syndrome">Repetitive
+Strain Injury</a>. 
+</p>
+<p style="border: none; padding: 0in">Scripting is also a great way
+of testing your code. You can write a few test cases and check your
+code easily. Use the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">check</font></font></span>
+command to verify that a value is what you think it should be. A sample script
+for problem 0 is provided in <a href="http://www.seas.upenn.edu/~cit593/resources/LC3code/p0.lcs">p0.lcs</a>. For assignments you will be given some scripts but they will not cover all the important cases, so you should augment
+the given scripts with some of your own.</p>
+<h3>6. General Help and Advice</h3>
+<p style="border: none; padding: 0in">This document doesn't cover all
+of the simulator's functionality; for an extended discussion of usage
+see the <a href="http://www.seas.upenn.edu/~cit593/resources/lc3manual.html">LC-3 Simulator Manual</a>. For quick
+help within the simulator itself, you can use the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">help</font></font></span>
+command to see a list of all of the LC-3's commands. Use <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">help
+(command)</font></font></span> to get help on a specific command. 
+</p>
+<p style="border: none; padding: 0in">Many of the LC-3 commands have
+shortcuts - <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">b</font></font></span>
+is short for <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">break</font></font></span>,
+<span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">n</font></font></span>
+for <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">next</font></font></span>,
+and so forth. Use the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">help</font></font></span>
+(or <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">h</font></font></span>)
+command to see what shortcuts exist. 
+</p>
+<p>The LC-3 Command Line has a history feature - use the up and down
+arrow keys to go backwards and forwards through the commands you've
+previously entered. 
+</p>
+<p style="border: none; padding: 0in">If you resize the simulator
+window to make it bigger, the Commandline Output Pane will grow. If
+you have a small screen and the Commandline Output Pane still isn't
+big enough, you can open an external, resizable Command Output Window
+by selecting the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">Open
+Command Output Window</font></font></span> option from the <span style="background: #d3d3d3"><font face="courier, monospace"><font color="#000000">File</font></font></span>
+menu. This lets you see a lot more output from the commands you run,
+and is particularly useful for viewing the errors the assembler
+generates.</p>
+
+<hr>
+<address>
+</address>
+<p style="border: none; padding: 0in">Original Document by <a href="http://www.seas.upenn.edu/~cit593/resources/www.cis.upenn.edu/~milom" target="_blank">Milo Martin</a>
+<br>
+Modified by <a href="http://www.seas.upenn.edu/~cit593/resources/www.cis.upenn.edu/~palsetia" target="_blank">Diana Palsetia</a>
+
+</p>
+<p style="border: none; padding: 0in">&nbsp; </p>
+<p style="border: none; padding: 0in">&nbsp;</p>
+<h2>PennSim LC-3 Simulator Manual</h2>
+<h4><a href="http://www.seas.upenn.edu/~cit593/resources/LC3code/PennSim.jar">Get the latest version of the
+simulator here.</a></h4>
+<h3>Overview</h3>
+<p>This document describes the Java version of the LC-3 Simulator
+(and assembler) developed at the University of Pennsylvania. It does
+not teach LC-3 programming or debugging techniques. Instead, it
+simply describes the features available in the LC-3 Simulator. </p>
+<p>The LC-3 Simulator provides an interface to executing LC-3
+programs on a simulated LC-3 machine. The interface allows users to
+observe and effect changes to LC-3 devices (such as the graphical
+video display, console text output, and keyboard input). It also
+allows users to control or limit the execution of a programming
+running on the simulator (for example, we might want to execute a
+program one instruction at a time) and observe or modify the state
+(memory and registers) of the machine.</p>
+<p>The LC-3 Simulator provides both a graphical and text-based
+interface (the later is specified via the '-t' flag). Our expectation
+is that only the graphical interface will be used, so this document
+does not describe the text interface explicitly. Nevertheless, most
+of the functionality of the graphic interface is available (via the
+"Command Line") to the text interface.</p>
+<h3>Running the LC-3 Simulator</h3>
+<p>For instructions on running the simulator, please see the <a href="http://www.seas.upenn.edu/~cit593/resources/lc3guide.html">LC-3
+Guide</a>. 
+</p>
+<h3>LC-3 Simulator Summary</h3>
+<p>The LC-3 Simulator window consists of five components: Menus,
+Controls, Registers, Memory, and Devices. Each is described below.</p>
+<h4>Menus</h4>
+<p>There are only two menus available ("File" and "About").
+The "Open .obj File" menu item under "File" is
+used to load an object file into the LC-3 machine. Note that this can
+also be achieved via the "Command Line" (see below). The
+"Open Command Output Window" menu item under "File"
+opens a window that mirrors the context of the "Command Line
+Output" panel (see Controls section, below). This is often
+useful because the Command Output Panel is somewhat small. Finally,
+the "Quit" menu item under "File" causes the
+simulator to terminate (after confirmation). 
+</p>
+<p>The "About" menu has only one item - "Simulator
+Version." Use this to make sure you're running the most current
+version of the simulator that has all the latest bug fixes, features,
+etc. 
+</p>
+<h4>Controls</h4>
+<p>The "Controls" section of the LC-3 Simulator (appearing
+at the top of the simulator window) is used to control and monitor
+the simulated machine. It contains four components: Execution
+Buttons, Machine Status Indicator, Command Line, and Command Line
+Output panel. Each are described below.</p>
+<h5>Execution Buttons</h5>
+<p>The Execution Buttons control the execution of a program in the
+LC-3 Simulator. 
+</p>
+<p>The "Next" button executes the instruction at the
+current PC and stops when the PC == (current PC + 1). If the
+instruction at the current PC is a subroutine call instruction (i.e.,
+JSR, JSRR) or a trap instruction, the machine will execute
+instructions until the PC points to the instruction <i>after</i> the
+JSR/JSRR/TRAP at which "Next" was called. "Next"
+is useful for walking through a program one instruction at a time,
+without going into subroutines and trap handlers. 
+</p>
+<p>The "Step" button is similar to "Next", but it
+will stop execution again after one instruction has been executed.
+Thus, "Step" follows execution <i>into</i> called functions
+and traps. 
+</p>
+<p>Both "Next" and "Step" follow branch
+instructions. 
+</p>
+<p style="margin-bottom: 0in">As an example of the results of "Next"
+versus "Step", consider the following code snippet: 
+</p>
+<table width="50%" border="1" cellpadding="2" cellspacing="2">
+	<tbody><tr>
+		<td>
+			<p>Address</p>
+		</td>
+		<td>
+			<p>Label</p>
+		</td>
+		<td>
+			<p>Instruction</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x3000</p>
+		</td>
+		<td>
+			<p>START</p>
+		</td>
+		<td>
+			<p>AND R0,R0,#0</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x3001</p>
+		</td>
+		<td></td>
+		<td>
+			<p>JSR FUNCTION</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x3002</p>
+		</td>
+		<td></td>
+		<td>
+			<p>NOT R0,R0</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x3003</p>
+		</td>
+		<td></td>
+		<td>
+			<p>BRz START</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x3004</p>
+		</td>
+		<td></td>
+		<td>
+			<p>HALT</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>...</p>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>
+			<p>x4000</p>
+		</td>
+		<td>
+			<p>FUNCTION</p>
+		</td>
+		<td>
+			<p>ADD R0,R0,#1</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x4001</p>
+		</td>
+		<td></td>
+		<td>
+			<p>RET</p>
+		</td>
+	</tr>
+</tbody></table>
+<p>If we set the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">PC</font></font>
+to <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x3000</font></font>
+and hit "Next", we will execute the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">AND</font></font>
+go to the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">JSR</font></font>
+instruction. Hitting "Next" again will execute everything
+in the function call, but the simulator won't stop until we reach the
+<font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">NOT</font></font>
+instruction, i.e. after the function has returned. Hitting "Next"
+again will follow the branch and take us to the START label. 
+</p>
+<p>If we set the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">PC</font></font>
+to <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x3000</font></font>
+and hit "Step", we will go to the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">JSR</font></font>
+instruction, as before. Hitting "Step" again will take us
+to the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">ADD</font></font>
+instruction inside the function call. Hitting "Step" one
+more time takes us to the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">RET</font></font>
+instruction, and we have to hit "Step" a fourth time to get
+to the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">NOT</font></font>
+instruction, after the function call. Hitting "Step" again
+will follow the branch and take us to the START label, just like
+"Next" did. 
+</p>
+<p>The "Continue" button starts execution with the
+instruction at the current PC. The machine will continue to execute
+instructions until the machine halts, a breakpoint (see below) is
+encountered, or the "Stop" button is pressed. 
+</p>
+<p>The "Stop" button stops execution of the machine.</p>
+<h5>Machine Status Indicator</h5>
+<p>The Machine Status Indicator (located to the right of the
+Execution Buttons) indicates the current state of the machine.
+"Halted" means the machine is halted (i.e., the "clock
+enable bit" of the Machine Control Register is cleared).
+"Suspended" means that the machine is not halted, but
+neither is it running. In this state you can examine and change the
+state of the machine, then resume execution via the "Next",
+"Step", or "Continue" buttons. "Running"
+means that the machine is actively executed instructions.</p>
+<p>Pressing the "Next", "Step", or "Continue"
+buttons will cause the machine to leave the "Halted"
+machine state (i.e., the Machine Status Indicator will change to
+"Running" then "Suspended"). If "Stop"
+is pressed while the Machine Status Indicator is "Running",
+it will change to "Suspended."</p>
+<h5>Command Line</h5>
+<p>The Command Line (located immediately below the Execution Buttons)
+is used to specify commands to control and monitor the LC-3 machine.
+Commands are typed on the command line and the command's output (if
+any) appears in the Command Line Output panel (below). See the
+Control Commands section (below) for a description of all the
+available commands.</p>
+<h5>Command Line Output panel</h5>
+<p>The Command Line Output panel displays the output (if any) of the
+commands entered into the Command Line. If you resize the LC-3
+Simulator window, the Command Line Output panel grows and shrinks.
+This is useful for making the Command Line Output panel larger so
+that you may better view the output of commands that produce a lot of
+output (e.g., "as"). If you are using a small monitor
+(e.g., 1024x768), open the "Command Output Window" (via the
+"File" menu). The Command Output Window simply mirrors the
+text in the Command Line Output panel.</p>
+<h4>Registers</h4>
+<p>The register panel is located on the left half of the screen. The
+LC-3 Simulator supports 8 general purpose registers, and has a few
+special registers (PC, MPR, PSR, CC). The value of each register is
+right next to its label, and the value can be modified by
+double-clicking on the value and typing in a new value. Values can
+either be in decimal, or in hexadecimal (hexadecimal numbers must be
+prefixed with an 'x').
+</p>
+<p>The general purpose registers are freely accessible throughout the
+entire program. Whenever an executed instruction changes the value of
+a register, it will automatically be updated in the Registers display
+panel. It is convenient to be able to monitor the values of registers
+for debugging purposes.Exception: do not use R0 and R7 to display any result at the end of your program. This is because after the instruction HALT, the control is sent back to OS. Some OS intructions overwrite registers R0 and R7.  
+</p>
+<p>The special registers on the other hand, cannot be directly
+referenced by the program and special instructions must be used to
+work with them. It is possible to modify their values by hand in the
+simulator though. 
+</p>
+<p>The <strong>PC</strong>, or Program Counter, indicates the address
+of the next instruction to be executed. 
+</p>
+<p><b><font color="#ff0000">NOTE:</font></b> When the LC-3 Simulator
+first starts up, the PC is automatically set to address x0200. This
+will generally be the location where the operating system begins.
+Generally we will give you an operating system to load into the
+machine, but we may also ask you to write parts of the operating
+system on your own. When the operating system finishes executing, it
+will then transfer control to the user program by jumping to location
+x3000. This means that <strong>all your user programs should begin
+execution at address x3000!</strong> More specifically, unless you
+are writing the operating system, make sure the first line of your
+program is .ORIG x3000. 
+</p>
+<p style="margin-bottom: 0in">The <strong>MPR</strong> is the Memory
+Protection Register. Each bit in the MPR controls whether
+instructions in a given memory range can be executed while in user
+mode (see <strong>PSR</strong> below) - 1 means that execution is
+allowed in a memory range in user mode, 0 means that it is only
+allowed in supervisor mode. Trying to execute code in a region for
+which the MPR doesn't allow execution results in an exception and
+will halt execution. Since the MPR is 16 bits, and the LC-3 has 2^16
+= 65,536 memory locations, each bit of the MPR controls 4096 (x1000)
+memory locations. The table below shows which regions of memory each
+MPR bit controls. 
+</p>
+<table border="1" cellpadding="2" cellspacing="2">
+	<tbody><tr>
+		<th width="50%">
+			<p>MPR Bit</p>
+		</th>
+		<th>
+			<p>Memory Region</p>
+		</th>
+	</tr>
+	<tr>
+		<td>
+			<p>MPR[0]</p>
+		</td>
+		<td>
+			<p>x0000 - x0FFF</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>MPR[1]</p>
+		</td>
+		<td>
+			<p>x1000 - x1FFF</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>MPR[2]</p>
+		</td>
+		<td>
+			<p>x2000 - x2FFF</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>...</p>
+		</td>
+		<td>
+			<p>...</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>MPR[15]</p>
+		</td>
+		<td>
+			<p>xF000 - xFFFF</p>
+		</td>
+	</tr>
+</tbody></table>
+<p>The <strong>PSR</strong>, or Process Status Register, indicates
+whether the LC-3 Simulator is operating in <em>supervisor mode</em>
+or <em>user mode</em>. If supervisor mode is enabled, PSR[15] is 1.
+Supervisor mode is enabled only for the operating system code, and it
+allows access to the different devices available to the machine (by
+allowing access to their memory-mapped regions - see MPR above).
+PSR[10:8] specify the priority level of the process being executed.
+PSR[2:0] contain the bits for the condition codes (CCs). PSR[2] is N,
+PSR[1] is Z, PSR[0] is P. 
+</p>
+<p>The <strong>CCs</strong>, or condition codes, are the 3 low-order
+bits of the PSR that give sign information of the most recently
+executed instruction that updated the codes, letting you determine
+whether the value was Negative, Zero, or Positive. These are used by
+the BR instruction in determining when to branch. The instructions
+that update the CCs are: ADD, AND, LD, LDI, LDR, LEA, and NOT. 
+</p>
+<h4>Memory</h4>
+<p>The memory locations are on the right half of the screen. Each row
+represents a location in memory, and the row will tell you: if there
+is a breakpoint set at the location, the actual address (and any
+labels that might exist there), the value, and what instruction the
+value represents. Only the value of the memory can be changed by
+double clicking on the current value (similar to changing register
+values). 
+</p>
+<p>The following table summarizes how memory space is mapped in the
+LC-3:</p>
+<table width="50%" border="1" cellpadding="2" cellspacing="2">
+	<tbody><tr>
+		<th width="50%">
+			<p>Address Range</p>
+		</th>
+		<th width="50%">
+			<p>Usage</p>
+		</th>
+	</tr>
+	<tr>
+		<td>
+			<p>x0000 - x00FF 
+			</p>
+		</td>
+		<td>
+			<p>Trap Vector Table 
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x0100 - x01FF 
+			</p>
+		</td>
+		<td>
+			<p>Interrupt Vector Table 
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x0200 - x2FFF</p>
+		</td>
+		<td>
+			<p><strong>Operating System</strong></p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x3000 - xBFFF 
+			</p>
+		</td>
+		<td>
+			<p><strong>User code &amp; stack </strong>
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>xC000 - xFDFF</p>
+		</td>
+		<td>
+			<p>Video output 
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>xFE00 - xFFFF 
+			</p>
+		</td>
+		<td>
+			<p>Device register addresses 
+			</p>
+		</td>
+	</tr>
+</tbody></table>
+<h4>Devices</h4>
+<p>A number of devices are available to the LC-3 simulator. The
+simulator uses memory-mapped device architecture, so accessing a
+device is just like accessing any other memory location. Following is
+a table that summarizes the device locations: 
+</p>
+<table width="70%" border="1" cellpadding="2" cellspacing="2">
+	<tbody><tr>
+		<th width="13%">
+			<p>Address</p>
+		</th>
+		<th width="24%">
+			<p>Device Register</p>
+		</th>
+		<th width="63%">
+			<p>Usage</p>
+		</th>
+	</tr>
+	<tr>
+		<td>
+			<p>xFE00</p>
+		</td>
+		<td>
+			<p>KBSR</p>
+		</td>
+		<td>
+			<p>Keyboard Status Register: when KBSR[15] is 1, the keyboard has
+			received a new character.</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>xFE02</p>
+		</td>
+		<td>
+			<p>KBDR</p>
+		</td>
+		<td>
+			<p>Keyboard Data Register: when a new character is available,
+			KBSR[7:0] contains the ASCII value of the typed character.</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>xFE04</p>
+		</td>
+		<td>
+			<p>DSR</p>
+		</td>
+		<td>
+			<p>Display Status Register: when DSR[15] is 1, the display is
+			ready to receive a new character to display.</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>xFE06</p>
+		</td>
+		<td>
+			<p>DDR</p>
+		</td>
+		<td>
+			<p>Display Data Register: when the display is ready, the display
+			will print the ASCII character contained in DDR[7:0]. 
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>xFE08</p>
+		</td>
+		<td>
+			<p>TMR</p>
+		</td>
+		<td>
+			<p>Timer Register: TMR[15] is 1 if the timer has gone off, and 0
+			otherwise.</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>xFE0A</p>
+		</td>
+		<td>
+			<p>TMI</p>
+		</td>
+		<td>
+			<p>Timer Interval Register: the number of milliseconds between
+			timer ticks. Setting this to 0 disables the timer, and setting it
+			to 1 sets the timer to generate "ticks" from "."
+			(period) characters read from the current Text I/O Device (either
+			user input or a file)</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>xFE12</p>
+		</td>
+		<td>
+			<p>MPR</p>
+		</td>
+		<td>
+			<p>Memory Protection Register: see <strong>Registers</strong>
+			above.</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>xFFFE</p>
+		</td>
+		<td>
+			<p>MCR</p>
+		</td>
+		<td>
+			<p>Machine Control Register: see <strong>Registers</strong> above.</p>
+		</td>
+	</tr>
+</tbody></table>
+<p>In addition to these devices, the <strong>video output</strong> is
+also memory-mapped from address location xC000 to xFDFF. The video
+display is 128 by 124 pixels (15,872 pixels total) and the coordinate
+system starts from (0,0) at the top left corner of the display. 
+</p>
+<p>Since each row is 128 pixels long, in order to find the location
+exactly one row below a given location, at x0080 to it. For example,
+if you are outputting to pixel (3, 10), whose memory location is
+xC18A, then one row immediately below it would be xC20A (=xC18A +
+x0080). 
+</p>
+<p>As a general rule, this is the formula to find the memory location
+associated with a given (<em>row</em>, <em>col</em>): 
+</p>
+<p><strong>addr = xC000 + <em>row</em>*x0080 + <em>col</em></strong> 
+</p>
+<p>Each video output memory location represents one pixel, which
+means that the value it contains must be formatted as a pixel would
+be (i.e. RGB format): 
+</p>
+<table width="23%" border="1" cellpadding="2" cellspacing="2">
+	<tbody><tr>
+		<th width="14%">
+			<p>[15]</p>
+		</th>
+		<th width="24%">
+			<p>[14:10]</p>
+		</th>
+		<th width="30%">
+			<p>[9:5]</p>
+		</th>
+		<th width="32%">
+			<p>[4:0]</p>
+		</th>
+	</tr>
+	<tr>
+		<td>
+			<p align="CENTER">0</p>
+		</td>
+		<td>
+			<p align="CENTER">RED</p>
+		</td>
+		<td>
+			<p align="CENTER">GREEN</p>
+		</td>
+		<td>
+			<p align="CENTER">BLUE</p>
+		</td>
+	</tr>
+</tbody></table>
+<p>A value like x7FFF (or xFFFF would work - bit 15 is actually
+ignored) in location xC000 would output a white dot at (0,0). Here
+are a few common colors: 
+</p>
+<table width="30%" border="1" cellpadding="2" cellspacing="2">
+	<tbody><tr>
+		<th width="50%">
+			<p>Pixel Code 
+			</p>
+		</th>
+		<th width="50%">
+			<p>Color</p>
+		</th>
+	</tr>
+	<tr>
+		<td>
+			<p>x7FFF</p>
+		</td>
+		<td>
+			<p>White</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x0000</p>
+		</td>
+		<td>
+			<p>Black</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x7C00</p>
+		</td>
+		<td>
+			<p>Red</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x03E0</p>
+		</td>
+		<td>
+			<p>Green</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x001F</p>
+		</td>
+		<td>
+			<p>Blue</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>x3466</p>
+		</td>
+		<td>
+			<p>Puce</p>
+		</td>
+	</tr>
+</tbody></table>
+<h4>Using Command-line </h4>
+<p>Below are all the commands that are available on the Command Line.
+</p>
+<h5 style="margin-bottom: 0in">help command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">h[elp]
+  usage: h[elp] [command]</font></font> 
+</p>
+<p style="margin-bottom: 0in">Prints a list of all available commands
+and their syntaxes. Specifying a command will give you a brief
+description of the command. 
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">help
+list</font></font> will display help using the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">list</font></font>
+command. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">as command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">as
+  - usage: as [-warn] &lt;filename&gt;</font></font> 
+</p>
+<p style="margin-bottom: 0in">Assembles &lt;filename&gt; showing
+errors and (optionally) warnings, and leaves a .obj file in the same
+directory. 
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">as
+-warn breakout.asm</font></font> 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">break command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">b[reak]
+  - usage: b[reak] [ set | clear ] [ mem_addr | label ]</font></font> 
+</p>
+<p style="margin-bottom: 0in">Sets or clears break point at specified
+memory address or label. 
+</p>
+<p style="margin-bottom: 0in">Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">break
+set x3000</font></font> will set a break point at memory location
+<font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x3000</font></font>.
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">break
+clear LABEL</font></font> will clear a previously set breakpoint at
+the location pointed to by <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">LABEL</font></font>.
+</p>
+<hr>
+<h5>continue command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">c[ontinue]
+  - usage: c[ontinue]</font></font></p>
+<p>Continues running instructions until next breakpoint is hit. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">check command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">check
+  - usage: check [ count | reset | PC | reg | PSR | MPR | mem_addr |
+  label | N | Z | P ] [ value | label ]</font></font> 
+</p>
+<p style="margin-bottom: 0in">Verifies that a particular value
+resides in a register or in a memory location, or that a condition
+code is set. <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">check
+count</font></font> prints the number of checks that passed and
+failed since the last invocation of <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">check
+reset</font></font>. 
+</p>
+<p>Samples:<br><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">check
+r0 17</font></font> checks that register <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">r0</font></font>
+has the value <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">17</font></font>.
+<font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">check
+PC LABEL</font></font> checks if the PC points to wherever <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">LABEL</font></font>
+points. <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">check
+LABEL x4000</font></font> checks if the value stored in memory at the
+location pointed to by <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">LABEL</font></font>
+is equal to <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x4000</font></font>.
+<font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">check
+x4000 LABEL</font></font> checks if the value stored in memory at
+<font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x4000</font></font>
+is equal to the location pointed to by <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">LABEL</font></font>
+(probably not very useful). To find out where a label points, use
+<font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">list</font></font>
+instead. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">clear command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">clear
+  - usage: clear</font></font> 
+</p>
+<p>Clears the commandline output window. Only available in GUI mode. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">dump command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">d[ump]
+  - usage: d[ump] [-check | -coe | -readmemh] from_mem_addr to_mem_addr
+  dumpfile</font></font> 
+</p>
+<p style="margin-bottom: 0in">Dumps a range of memory values (range
+endpoints can be expressed in hex or decimal) to dumpfile as raw
+values (1 per line). The memory values themselves are in hex. Various
+flags modify the dumped output format: 
+</p>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">-check</font></font>:
+dump memory as a series of <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">check</font></font>
+commands that can be run directly as a sript. 
+</p>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">-coe</font></font>:
+dump memory as a .coe file, suitable for passing to the Xilinx CORE
+generator as the initial contents of a memory. 
+</p>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">-readmemh</font></font>:
+dump memory in a format that can be read by the Verilog system call
+$readmemh(). 
+</p>
+<p style="margin-bottom: 0in">Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">dump
+-check x100 x150 addresses.txt</font></font> 
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">dump
+-coe 20 42 memory.coe</font></font> 
+</p>
+<hr>
+<h5>input command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">input
+  - usage: input &lt;filename&gt;</font></font></p>
+<p style="margin-bottom: 0in">Specifies a file to read the input from
+instead of keyboard device (simulator must be restarted to restore
+normal keyboard input). 
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">input
+keystrokes.txt</font></font> 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">list command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">l[ist]
+  - usage: l[ist] [ addr1 | label1 [addr2 | label2] ]</font></font></p>
+<p style="margin-bottom: 0in">Lists the contents of memory locations
+(default address is PC. Specify range by giving 2 arguments). 
+</p>
+<p style="margin-bottom: 0in">Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">list
+LABEL</font></font> will list the contents of memory that is pointed
+to by <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">LABEL</font></font>.
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">list
+x3000 x300A</font></font> will list the contents of the 11 memory
+locations between <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x3000</font></font>
+and <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x300A</font></font>.
+</p>
+<h5 style="margin-bottom: 0in">load command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">l[oa]d
+  - usage: l[oa]d &lt;filename&gt;</font></font> 
+</p>
+<p style="margin-bottom: 0in">Loads an object file into the memory. 
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">load
+breakout.obj</font></font> 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">next command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">n[ext]
+  - usage: n[ext]</font></font> 
+</p>
+<p>Executes the next instruction. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">print command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">p[rint]
+  - usage: p[rint]</font></font></p>
+<p>Prints out all registers, PC, MPR and PSR. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">quit Command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">quit
+  - usage: quit</font></font> 
+</p>
+<p>Quit the simulator. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">reset Command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">reset
+  - usage: reset</font></font> 
+</p>
+<p>Resets the machine (clears out registers and memory) and simulator. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">step command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">s[tep]
+  - usage: s[tep]</font></font> 
+</p>
+<p>Steps into the next instruction. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">script command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">script
+  - usage: script &lt;filename&gt;</font></font> 
+</p>
+<p style="margin-bottom: 0in">Specifies a file from which to read
+commands. 
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">script
+myscript.txt</font></font> 
+</p>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">set
+- usage: set [ PC | reg | PSR | MPR | mem_addr | label ] [ value | N
+| Z | P ]</font></font> 
+</p>
+<p style="margin-bottom: 0in">Sets the value of a
+register/PC/PSR/label/memory_location or set the condition codes
+individually. 
+</p>
+<p style="margin-bottom: 0in">Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">set
+PC x3000</font></font> sets the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">PC</font></font>
+to point to <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x3000</font></font>.
+</p>
+<p style="margin-bottom: 0in">Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">set
+r1 17</font></font> sets register <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">r0</font></font>
+to have the value <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">17</font></font>.
+</p>
+<p style="margin-bottom: 0in">Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">set
+x4000 -5</font></font> sets memory location <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x4000</font></font>
+to the value <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">-5</font></font>.
+</p>
+<p style="margin-bottom: 0in">Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">set
+LABEL x0A</font></font> sets the value of the memory location pointed
+to by <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">LABEL</font></font>
+to be <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">x0A</font></font>.
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">set
+N</font></font> sets the <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">N</font></font>
+condition code. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">stop command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">stop
+  - usage: stop</font></font> 
+</p>
+<p>Stops execution. You can enter this command after you have started
+execution with <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">continue</font></font>
+to stop execution. 
+</p>
+<hr>
+<h5 style="margin-bottom: 0in">trace command </h5>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">trace
+  - usage: [on trace_file | off]</font></font> 
+</p>
+<p style="margin-bottom: 0in">For each instruction executed, this
+command dumps a subset of processor state to a file, to create a
+trace that can be used to verify correctness of execution. The state
+consists of, in order, (1) PC, (2) current insn, (3) regfile
+write-enable, (4) regfile data in, (5) data memory write-enable, (6)
+data memory address, and (7) data memory data in. These values are
+written in hex to trace_file, one line for each instruction executed.
+Note that trace files can get very large very quickly! Sometimes a
+signal may be a don't-care value - if we're not writing to the
+regfile, the `regfile data in' value is undefined - but the
+write-enable values should allow don't-care signals to be determined
+in all cases. 
+</p>
+<p>Example: <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">trace
+on my.trace</font></font> enables tracing. Next, run some
+instructions. When you're done, run the command <font size="2" style="font-size: 10pt"><font face="Courier New, Courier, mono">trace
+off</font></font> to finalize the trace file. 
+</p>
+<p>&nbsp; 
+</p>
+<hr>
+<address>
+Original Document by <a href="http://www.cis.upenn.edu/~eclewis/" target="_blank">E Lewis</a> 
+</address>
+<address>
+For Questions contact <a href="mailto:palsetia@cis.upenn.edu">Diana Palsetia</a>
+</address>
+<p><!-- Created: Fri Sep  2 14:24:11 EDT 2005 --><!-- hhmts start -->
+  Last
+modified: THUR 23rd OCT 8 2008
+  <!-- hhmts end --> 
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>

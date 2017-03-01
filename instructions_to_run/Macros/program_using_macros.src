@@ -1,0 +1,57 @@
+;;---------------------------
+;;--  skel.src
+;;--
+;;-- A skeleton example program that uses our m4 macros.
+;;-- To get macros expanded to LC3 assembly language:
+;;--
+;;--   cat macros.m4 skel.src | m4 > skel.asm
+;;--
+;;----------------------------
+ 
+.ORIG x0200
+
+;;========== TEXT =========================================
+
+_enter:      ;;=========== Preamble =============
+
+  LD  gdp__ , _GDT_address   ;;-- set gdp to start of data table
+  LDR sp__  , gdp__ , 0      ;;-- set sp to bottom of stack
+  LDR bp__  , gdp__ , 0      ;;-- set bp to bottom of stack
+  LD  R7    , _main_address  ;;-- R7 <=== address of _main
+  JMP R7                     ;;-- goto _main
+
+_GDT_address:  .FILL _GDT
+_main_address: .FILL _main
+
+
+_main:      ;;============ Main =================
+
+  inc__(R0)
+  neg__(R0)
+  push__(R0)
+  pop__(R0)
+  dec__(R0)
+  set__(R0,#5)
+  set__(R0,xF)
+  mov__(R1,R0)
+  sub__(R0,R0,R1)
+  or__(R0,R0,R1)
+  test__(R0)
+
+  STR R0, gdp__ , 1
+
+_exit:                     ;;-- We don't know what to do here.
+  BR _exit                 ;;-- Let's just hang in a loop.
+
+;;========== DATA =========================================
+
+_GDT:
+
+;;-- identifier   value             offset  description
+;;-------------   ------            ------  ---------------
+
+    _STACKBOT:   .FILL x8000   ;;-- (  0)  stack's start address
+    _x:          .BLKW 1       ;;-- (  1)  var x
+
+
+.END

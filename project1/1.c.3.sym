@@ -1,0 +1,9 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	NEG2POS           3027
+//	$               3027
+//	$               3028
+//	$               3029
+
